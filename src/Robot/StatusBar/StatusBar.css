@@ -1,3 +1,14 @@
 .StatusBar {
-    height:45px;
+    height:45px;    
+    width: 638px;
+    border: 1px solid black;
+}
+
+.StatusBar table{
+    border-collapse:collapse;    
+}
+
+.StatusBar td{
+    width:150px;
+    padding:0px 5px;
 }
