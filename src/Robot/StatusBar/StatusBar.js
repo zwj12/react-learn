@@ -19,9 +19,26 @@ class StatusBar extends Component {
   }
 
   tick() {
+    this.getDataFromWebServiceAsyc();
     this.setState({
       date: new Date()
     });
+  }
+
+  getDataFromWebServiceAsyc() {
+    var rwServiceResource = new XMLHttpRequest();
+    rwServiceResource.onreadystatechange = function () {
+      if (rwServiceResource.readyState === 4) {
+        if (rwServiceResource.status === 200) {
+          var result = rwServiceResource.responseText;
+          console.log(result);
+        } else {
+          alert("Error " + rwServiceResource.status + ": " + rwServiceResource.statusText);
+        }
+      }
+    }
+    rwServiceResource.open("GET", "http://localhost:8680/rw/panel/opmode", true);
+    rwServiceResource.send();
   }
 
   render() {

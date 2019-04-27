@@ -3,7 +3,7 @@ import './View.css';
 
 class View extends Component {
   constructor(props) {
-    super(props);    
+    super(props);
   }
 
   componentDidMount() {
@@ -12,13 +12,13 @@ class View extends Component {
   componentWillUnmount() {
   }
 
-    render() {
-      return (
-        <div className="View">
-          View
+  render() {
+    return (
+      <div className="View">
+        View
         </div>
-      );
-    }
+    );
   }
-  
-  export default View;
+}
+
+export default View;
