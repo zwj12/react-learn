@@ -4,7 +4,11 @@ import './StatusBar.css';
 class StatusBar extends Component {
   constructor(props) {
     super(props);
-    this.state = { date: new Date() };
+    this.state = {
+      date: new Date(),
+      operatingMode: "UNDEF",
+      controllerState: "init"
+    };
   }
 
   componentDidMount() {
@@ -19,26 +23,77 @@ class StatusBar extends Component {
   }
 
   tick() {
-    this.getDataFromWebServiceAsyc();
+    //this.getOperationMode();
+    //this.getControllerState();
+    //this.getRWServiceResource("/rw/panel/ctrlstate?json=1", "controllerState", "ctrlstate")
+    this.getRWServiceResourceSync("/rw/panel/opmode?json=1", "operatingMode", "opmode")
+    this.getRWServiceResourceSync("/rw/panel/ctrlstate?json=1", "controllerState", "ctrlstate")
     this.setState({
       date: new Date()
     });
   }
 
-  getDataFromWebServiceAsyc() {
+  getOperationMode() {
     var rwServiceResource = new XMLHttpRequest();
-    rwServiceResource.onreadystatechange = function () {
+    rwServiceResource.onreadystatechange = () => {
       if (rwServiceResource.readyState === 4) {
         if (rwServiceResource.status === 200) {
-          var result = rwServiceResource.responseText;
-          console.log(result);
+          var obj = JSON.parse(rwServiceResource.responseText);
+          var service = obj._embedded._state[0];
+          this.setState({
+            operatingMode: service.opmode
+          });
         } else {
-          alert("Error " + rwServiceResource.status + ": " + rwServiceResource.statusText);
+          //alert("Error " + rwServiceResource.status + ": " + rwServiceResource.statusText);
+          console.log("Error " + rwServiceResource.status + ": " + rwServiceResource.statusText);
         }
       }
     }
-    rwServiceResource.open("GET", "http://localhost:8680/rw/panel/opmode", true);
+    rwServiceResource.open("GET", "/rw/panel/opmode?json=1", true);
     rwServiceResource.send();
+  }
+
+  getControllerState() {
+    var rwServiceResource = new XMLHttpRequest();
+    rwServiceResource.onreadystatechange = () => {
+      if (rwServiceResource.readyState == 4 && rwServiceResource.status == 200) {
+        var obj = JSON.parse(rwServiceResource.responseText);
+        var service = obj._embedded._state[0];
+        this.setState({
+          controllerState: service.ctrlstate
+        });
+      }
+    }
+    rwServiceResource.open("GET", "/rw/panel/ctrlstate?json=1", true);
+    rwServiceResource.send();
+  }
+
+  getRWServiceResource(resource, key, value) {
+    var rwServiceResource = new XMLHttpRequest();
+    rwServiceResource.onreadystatechange = () => {
+      if (rwServiceResource.readyState == 4 && rwServiceResource.status == 200) {
+        var obj = JSON.parse(rwServiceResource.responseText);
+        var service = obj._embedded._state[0];
+        this.setState({
+          [key]: service[value]
+        });
+      }
+    }
+    rwServiceResource.open("GET", resource, true);
+    rwServiceResource.send();
+  }
+
+  getRWServiceResourceSync(resource, key, value) {
+    var rwServiceResource = new XMLHttpRequest();
+    rwServiceResource.open("GET", resource, false);
+    rwServiceResource.send();
+    if (rwServiceResource.status == 200) {
+      var obj = JSON.parse(rwServiceResource.responseText);
+      var service = obj._embedded._state[0];
+      this.setState({
+        [key]: service[value]
+      });
+    }
   }
 
   render() {
@@ -46,8 +101,8 @@ class StatusBar extends Component {
       <div className="StatusBar">
         <table>
           <tr>
-            <td>{this.props.operatingMode}</td>
-            <td>{this.props.controllerState}</td>
+            <td>{this.state.operatingMode}</td>
+            <td>{this.state.controllerState}</td>
             <td>{this.state.date.toLocaleTimeString()}</td>
           </tr>
           <tr>
