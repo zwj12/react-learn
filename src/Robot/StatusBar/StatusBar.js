@@ -7,7 +7,11 @@ class StatusBar extends Component {
     this.state = {
       date: new Date(),
       operatingMode: "UNDEF",
-      controllerState: "init"
+      controllerState: "init",
+      runningSpeed: "100",
+      programState: "stopped",
+      systemName: "",
+      controllerName: "",
     };
   }
 
@@ -25,9 +29,14 @@ class StatusBar extends Component {
   tick() {
     //this.getOperationMode();
     //this.getControllerState();
-    //this.getRWServiceResource("/rw/panel/ctrlstate?json=1", "controllerState", "ctrlstate")
-    this.getRWServiceResourceSync("/rw/panel/opmode?json=1", "operatingMode", "opmode")
     this.getRWServiceResourceSync("/rw/panel/ctrlstate?json=1", "controllerState", "ctrlstate")
+    this.getRWServiceResourceSync("/rw/panel/opmode?json=1", "operatingMode", "opmode")
+    this.getRWServiceResourceSync("/rw/panel/speedratio?json=1", "runningSpeed", "speedratio")
+    this.getRWServiceResourceSync("/rw/rapid/execution?json=1", "programState", "ctrlexecstate")
+    this.getRWServiceResourceSync("/rw/system?json=1", "systemName", "name")
+    this.getRWServiceResourceSync("/ctrl/identity?json=1", "controllerName", "ctrl-name")
+    //this.getRWServiceResourceSync("/rw/panel/opmode?json=1", "operatingMode", "opmode")
+    //this.getRWServiceResourceSync("/rw/panel/ctrlstate?json=1", "controllerState", "ctrlstate")
     this.setState({
       date: new Date()
     });
@@ -78,6 +87,7 @@ class StatusBar extends Component {
           [key]: service[value]
         });
       }
+      console.log(resource + ", "+ key +", "+ value + ", readyState:" + rwServiceResource.readyState + ", status=" + rwServiceResource.status + "");
     }
     rwServiceResource.open("GET", resource, true);
     rwServiceResource.send();
@@ -93,6 +103,7 @@ class StatusBar extends Component {
       this.setState({
         [key]: service[value]
       });
+      //console.log(resource + ", "+ key +", "+ value + ", readyState:" + rwServiceResource.readyState + ", status=" + rwServiceResource.status + "");
     }
   }
 
@@ -106,9 +117,9 @@ class StatusBar extends Component {
             <td>{this.state.date.toLocaleTimeString()}</td>
           </tr>
           <tr>
-            <td>{this.props.systemName}</td>
-            <td>{this.props.programState}</td>
-            <td>{this.props.runningSpeed}%</td>
+            <td>{this.state.systemName}({this.state.controllerName})</td>
+            <td>{this.state.programState}</td>
+            <td>{this.state.runningSpeed}%</td>
           </tr>
         </table>
       </div>
