@@ -16,6 +16,7 @@ class StatusBar extends Component {
   }
 
   componentDidMount() {
+    //console.log("componentDidMount by StatusBar");
     this.timerID = setInterval(
       () => this.tick(),
       1000
@@ -29,14 +30,14 @@ class StatusBar extends Component {
   tick() {
     //this.getOperationMode();
     //this.getControllerState();
-    this.getRWServiceResourceSync("/rw/panel/ctrlstate?json=1", "controllerState", "ctrlstate")
-    this.getRWServiceResourceSync("/rw/panel/opmode?json=1", "operatingMode", "opmode")
-    this.getRWServiceResourceSync("/rw/panel/speedratio?json=1", "runningSpeed", "speedratio")
-    this.getRWServiceResourceSync("/rw/rapid/execution?json=1", "programState", "ctrlexecstate")
-    this.getRWServiceResourceSync("/rw/system?json=1", "systemName", "name")
-    this.getRWServiceResourceSync("/ctrl/identity?json=1", "controllerName", "ctrl-name")
-    //this.getRWServiceResourceSync("/rw/panel/opmode?json=1", "operatingMode", "opmode")
+    //console.log("tick by StatusBar");
     //this.getRWServiceResourceSync("/rw/panel/ctrlstate?json=1", "controllerState", "ctrlstate")
+    //this.getRWServiceResourceSync("/rw/panel/opmode?json=1", "operatingMode", "opmode")
+    //this.getRWServiceResourceSync("/rw/panel/speedratio?json=1", "runningSpeed", "speedratio")
+    //this.getRWServiceResourceSync("/rw/rapid/execution?json=1", "programState", "ctrlexecstate")
+    //this.getRWServiceResourceSync("/rw/system?json=1", "systemName", "name")
+    //this.getRWServiceResourceSync("/ctrl/identity?json=1", "controllerName", "ctrl-name")
+
     this.setState({
       date: new Date()
     });
@@ -100,6 +101,7 @@ class StatusBar extends Component {
     if (rwServiceResource.status == 200) {
       var obj = JSON.parse(rwServiceResource.responseText);
       var service = obj._embedded._state[0];
+      //console.log(service);
       this.setState({
         [key]: service[value]
       });
@@ -112,14 +114,14 @@ class StatusBar extends Component {
       <div className="StatusBar">
         <table>
           <tr>
-            <td>{this.state.operatingMode}</td>
-            <td>{this.state.controllerState}</td>
+            <td>{this.props.operatingMode}</td>
+            <td>{this.props.controllerState}</td>
             <td>{this.state.date.toLocaleTimeString()}</td>
           </tr>
           <tr>
-            <td>{this.state.systemName}({this.state.controllerName})</td>
-            <td>{this.state.programState}</td>
-            <td>{this.state.runningSpeed}%</td>
+            <td>{this.props.systemName}({this.props.controllerName})</td>
+            <td>{this.props.programState}</td>
+            <td>{this.props.runningSpeed}%</td>
           </tr>
         </table>
       </div>
