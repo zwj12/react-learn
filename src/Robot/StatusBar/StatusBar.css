@@ -1,6 +1,7 @@
 .StatusBar {
     height:45px;    
-    width: 638px;
+    /*width: 638px;*/
+    width: 1278px;
     border: 1px solid black;
 }
 
@@ -9,6 +10,6 @@
 }
 
 .StatusBar td{
-    width:150px;
+    width:400px;
     padding:0px 5px;
 }

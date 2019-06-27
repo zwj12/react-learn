@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './Robot.css';
 import View from './View/View';
 import StatusBar from './StatusBar/StatusBar';
+import LayerParameter from '../Ebara/LayerParameter';
 
 class Robot extends Component {
   constructor(props) {
@@ -14,11 +15,18 @@ class Robot extends Component {
       systemName: "",
       controllerName: "",
     };
-    this.getRWServiceResourceSync("/rw/system?json=1", "systemName", "name")
-    this.getRWServiceResourceSync("/ctrl/identity?json=1", "controllerName", "ctrl-name")
+    this.state.layerParameter=new LayerParameter();
   }
 
-  Subscription() {
+  subscription() {
+    this.getRWServiceResourceSync("/rw/system?json=1", "systemName", "name");
+    this.getRWServiceResourceSync("/ctrl/identity?json=1", "controllerName", "ctrl-name");
+    var layerParameter=new LayerParameter();
+    layerParameter.getDataFromWebServiceSync(1);
+    this.setState({
+      layerParameter: layerParameter,
+    })
+
     var rWebServiceRequest = new XMLHttpRequest();
 
     rWebServiceRequest.onreadystatechange = () => {
@@ -26,7 +34,8 @@ class Robot extends Component {
       //status: 200, 201 - CREATED
       if (rWebServiceRequest.readyState == 4 && rWebServiceRequest.status == 201) {
         var strLocation = rWebServiceRequest.getResponseHeader("Location");
-        console.log(rWebServiceRequest.responseText);
+        //console.log(rWebServiceRequest.responseText);
+        this.parseSubscriptionEvent(rWebServiceRequest.responseText)
 
         //must add sub-protocol "robapi2_subscription"
         var ws = new WebSocket(strLocation, "robapi2_subscription");
@@ -36,40 +45,7 @@ class Robot extends Component {
         };
 
         ws.onmessage = (evt) => {
-          function resolver(prefix) {
-            switch (prefix) {
-              default: return "http://www.w3.org/1999/xhtml";
-            }
-          }
-
-          var received_msg = evt.data;
-          console.log(received_msg);
-          var parser = new DOMParser();
-          var xmlDoc = parser.parseFromString(received_msg, "text/xml");
-          var nodes = xmlDoc.evaluate("//xmlns:li[@class='pnl-ctrlstate-ev']/xmlns:span", xmlDoc, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-          if(nodes.singleNodeValue!=null){
-            this.setState({
-              controllerState: nodes.singleNodeValue.innerHTML,
-            });
-          }
-          nodes = xmlDoc.evaluate("//xmlns:li[@class='pnl-opmode-ev']/xmlns:span", xmlDoc, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-          if(nodes.singleNodeValue!=null){
-            this.setState({
-              operatingMode: nodes.singleNodeValue.innerHTML,
-            });
-          }
-          nodes = xmlDoc.evaluate("//xmlns:li[@class='pnl-speedratio-ev']/xmlns:span", xmlDoc, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-          if(nodes.singleNodeValue!=null){
-            this.setState({
-              runningSpeed: nodes.singleNodeValue.innerHTML,
-            });
-          }
-          nodes = xmlDoc.evaluate("//xmlns:li[@class='rap-ctrlexecstate-ev']/xmlns:span", xmlDoc, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-          if(nodes.singleNodeValue!=null){
-            this.setState({
-              programState: nodes.singleNodeValue.innerHTML,
-            });
-          } 
+          this.parseSubscriptionEvent(evt.data)
         };
 
         ws.onclose = () => {
@@ -84,7 +60,7 @@ class Robot extends Component {
 
     rWebServiceRequest.open("POST", "/subscription", true);
     rWebServiceRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    var strEntityBody = "resources=1&1=/rw/panel/ctrlstate&1-p=0"    
+    var strEntityBody = "resources=1&1=/rw/panel/ctrlstate&1-p=0"
       + "&resources=2&2=/rw/panel/opmode&2-p=0"
       + "&resources=3&3=/rw/panel/speedratio&3-p=0"
       + "&resources=4&4=/rw/rapid/execution;ctrlexecstate&4-p=0"
@@ -93,12 +69,12 @@ class Robot extends Component {
   }
 
   componentDidMount() {
-    this.Subscription();
+    this.subscription();
   }
 
   componentWillUnmount() {
   }
-  
+
   getRWServiceResource(resource, key, value) {
     var rwServiceResource = new XMLHttpRequest();
     rwServiceResource.onreadystatechange = () => {
@@ -109,7 +85,7 @@ class Robot extends Component {
           [key]: service[value]
         });
       }
-      console.log(resource + ", "+ key +", "+ value + ", readyState:" + rwServiceResource.readyState + ", status=" + rwServiceResource.status + "");
+      console.log(resource + ", " + key + ", " + value + ", readyState:" + rwServiceResource.readyState + ", status=" + rwServiceResource.status + "");
     }
     rwServiceResource.open("GET", resource, true);
     rwServiceResource.send();
@@ -130,7 +106,44 @@ class Robot extends Component {
     }
   }
 
+  parseSubscriptionEvent(received_msg) {
+    function resolver(prefix) {
+      switch (prefix) {
+        default: return "http://www.w3.org/1999/xhtml";
+      }
+    }
+
+    console.log(received_msg);
+    var parser = new DOMParser();
+    var xmlDoc = parser.parseFromString(received_msg, "text/xml");
+    var nodes = xmlDoc.evaluate("//xmlns:li[@class='pnl-ctrlstate-ev']/xmlns:span", xmlDoc, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    if (nodes.singleNodeValue != null) {
+      this.setState({
+        controllerState: nodes.singleNodeValue.innerHTML,
+      });
+    }
+    nodes = xmlDoc.evaluate("//xmlns:li[@class='pnl-opmode-ev']/xmlns:span", xmlDoc, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    if (nodes.singleNodeValue != null) {
+      this.setState({
+        operatingMode: nodes.singleNodeValue.innerHTML,
+      });
+    }
+    nodes = xmlDoc.evaluate("//xmlns:li[@class='pnl-speedratio-ev']/xmlns:span", xmlDoc, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    if (nodes.singleNodeValue != null) {
+      this.setState({
+        runningSpeed: nodes.singleNodeValue.innerHTML,
+      });
+    }
+    nodes = xmlDoc.evaluate("//xmlns:li[@class='rap-ctrlexecstate-ev']/xmlns:span", xmlDoc, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    if (nodes.singleNodeValue != null) {
+      this.setState({
+        programState: nodes.singleNodeValue.innerHTML,
+      });
+    }
+  }
+
   render() {
+
     return (
       <div className="Robot">
         <StatusBar operatingMode={this.state.operatingMode}
@@ -139,8 +152,8 @@ class Robot extends Component {
           controllerName={this.state.controllerName}
           programState={this.state.programState}
           runningSpeed={this.state.runningSpeed} />
-        <View />
-        Robot
+        <View layerParameter={this.state.layerParameter}/>
+        © Copyright 2019 FPD WAC ABB
         </div>
     );
   }

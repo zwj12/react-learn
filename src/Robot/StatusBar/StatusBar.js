@@ -119,7 +119,7 @@ class StatusBar extends Component {
             <td>{this.state.date.toLocaleTimeString()}</td>
           </tr>
           <tr>
-            <td>{this.props.systemName}({this.props.controllerName})</td>
+            <td>{this.props.systemName}&nbsp;({this.props.controllerName})</td>
             <td>{this.props.programState}</td>
             <td>{this.props.runningSpeed}%</td>
           </tr>

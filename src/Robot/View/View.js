@@ -15,8 +15,8 @@ class View extends Component {
   render() {
     return (
       <div className="View">
-        View
-        </div>
+        {this.props.layerParameter.toString()}
+      </div>
     );
   }
 }
