@@ -22,7 +22,8 @@ class Robot extends Component {
     this.getRWServiceResourceSync("/rw/system?json=1", "systemName", "name");
     this.getRWServiceResourceSync("/ctrl/identity?json=1", "controllerName", "ctrl-name");
     var layerParameter=new LayerParameter();
-    layerParameter.getDataFromWebServiceSync(1);
+    //layerParameter.getDataFromWebServiceSync(1);
+    layerParameter.refreshDataFromWebServiceSync(1);
     this.setState({
       layerParameter: layerParameter,
     })

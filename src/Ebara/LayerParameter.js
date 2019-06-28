@@ -1,7 +1,11 @@
 import Circle from './Circle';
+import WebService from '../Robot/WebService';
+import { switchStatement } from '@babel/types';
 
 class LayerParameter {
     constructor() {
+        this.task="T_ROB1";
+        this.module="GlobalDataModule";
         this.numLayerNo = 0;
         this.numWorkAngleDeclination = 0;
         this.rCircleOffsetX = new Circle();
@@ -88,10 +92,21 @@ class LayerParameter {
             // console.log(rwServiceResource.responseText);
             var obj = JSON.parse(rwServiceResource.responseText);
             var jsonItem = obj._embedded._state[0];
-             this.parse(jsonItem.value);
+            this.parse(jsonItem.value);
         } else {
             alert("Error " + rwServiceResource.status + ": " + rwServiceResource.statusText);
         }
+    }
+
+    refreshDataFromWebServiceSync(numLayerNo) {
+        var strLayerParameter="";
+        if (this.numLayerNo < 10) {
+            strLayerParameter=WebService.GetRapidSymbolDataSync(this.task,this.module,"rLayerParameter0" + numLayerNo )
+        } else {
+            strLayerParameter=WebService.GetRapidSymbolDataSync(this.task,this.module,"rLayerParameter" + numLayerNo )
+        }
+        console.log(strLayerParameter);
+        this.parse(strLayerParameter);
     }
 
 }
