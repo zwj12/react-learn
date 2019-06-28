@@ -15,18 +15,23 @@ class Robot extends Component {
       systemName: "",
       controllerName: "",
     };
-    this.state.layerParameter=new LayerParameter();
+    this.state.layerParameter = new LayerParameter();
+    this.state.layerParameters = new Array(0);
   }
 
   subscription() {
     this.getRWServiceResourceSync("/rw/system?json=1", "systemName", "name");
     this.getRWServiceResourceSync("/ctrl/identity?json=1", "controllerName", "ctrl-name");
-    var layerParameter=new LayerParameter();
+    var layerParameters =LayerParameter.getLayerParameters();
+    // layerParameters=LayerParameter.getLayerParameters();
+
+    var layerParameter = new LayerParameter();
     //layerParameter.getDataFromWebServiceSync(1);
     layerParameter.refreshDataFromWebServiceSync(1);
     this.setState({
       layerParameter: layerParameter,
-    })
+      layerParameters: layerParameters,
+    });
 
     var rWebServiceRequest = new XMLHttpRequest();
 
@@ -153,9 +158,9 @@ class Robot extends Component {
           controllerName={this.state.controllerName}
           programState={this.state.programState}
           runningSpeed={this.state.runningSpeed} />
-        <View layerParameter={this.state.layerParameter}/>
+        <View layerParameters={this.state.layerParameters} />
         © Copyright 2019 FPD WAC ABB
-        </div>
+      </div>
     );
   }
 }

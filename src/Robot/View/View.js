@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './View.css';
+import LayerParameter from '../../Ebara/LayerParameter';
 
 class View extends Component {
   constructor(props) {
@@ -13,9 +14,21 @@ class View extends Component {
   }
 
   render() {
+    // console.log(this.props.layerParameters);
+    const listItems = this.props.layerParameters.map((layerParameter, index) =>
+      <LayerParameter layerParameter={layerParameter} index={index} />
+    );
+
     return (
       <div className="View">
-        {this.props.layerParameter.toString()}
+        <table>
+          <caption>LayerParameters</caption>
+          <tr>
+            <th>index</th>
+            <th>numWorkAngleDeclination</th>
+          </tr>
+          {listItems}
+        </table>
       </div>
     );
   }

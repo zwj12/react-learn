@@ -1,11 +1,13 @@
 import Circle from './Circle';
 import WebService from '../Robot/WebService';
-import { switchStatement } from '@babel/types';
+import React, { Component } from 'react';
+import './LayerParameter.css';
 
-class LayerParameter {
-    constructor() {
-        this.task="T_ROB1";
-        this.module="GlobalDataModule";
+class LayerParameter extends Component {
+    constructor(props) {
+        super(props);
+        this.task = "T_ROB1";
+        this.module = "GlobalDataModule";
         this.numLayerNo = 0;
         this.numWorkAngleDeclination = 0;
         this.rCircleOffsetX = new Circle();
@@ -99,16 +101,35 @@ class LayerParameter {
     }
 
     refreshDataFromWebServiceSync(numLayerNo) {
-        var strLayerParameter="";
-        if (this.numLayerNo < 10) {
-            strLayerParameter=WebService.GetRapidSymbolDataSync(this.task,this.module,"rLayerParameter0" + numLayerNo )
+        var strLayerParameter = "";
+        if (numLayerNo < 10) {
+            strLayerParameter = WebService.GetRapidSymbolDataSync(this.task, this.module, "rLayerParameter0" + numLayerNo)
         } else {
-            strLayerParameter=WebService.GetRapidSymbolDataSync(this.task,this.module,"rLayerParameter" + numLayerNo )
+            strLayerParameter = WebService.GetRapidSymbolDataSync(this.task, this.module, "rLayerParameter" + numLayerNo)
         }
         console.log(strLayerParameter);
         this.parse(strLayerParameter);
     }
 
+    static getLayerParameters() {
+        var layerParameters = new Array(0);
+        for (var i = 0; i < 40; i++) {
+            var layerParameter = new LayerParameter();
+            layerParameter.refreshDataFromWebServiceSync(i+1);
+            // console.log(layerParameter.toString());
+            layerParameters[layerParameters.length] = layerParameter;
+        }
+        return layerParameters;
+    }
+
+    render() {
+        return (
+            <tr>
+                <td>{this.props.index}</td>
+                <td>{this.props.layerParameter.numWorkAngleDeclination}</td>
+            </tr>
+        );
+    }
 }
 
 export default LayerParameter;
