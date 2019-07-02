@@ -3,6 +3,7 @@ import './Robot.css';
 import View from './View/View';
 import StatusBar from './StatusBar/StatusBar';
 import LayerParameter from '../Ebara/LayerParameter';
+import WebService from './webService'
 
 class Robot extends Component {
   constructor(props) {
@@ -22,7 +23,7 @@ class Robot extends Component {
   subscription() {
     this.getRWServiceResourceSync("/rw/system?json=1", "systemName", "name");
     this.getRWServiceResourceSync("/ctrl/identity?json=1", "controllerName", "ctrl-name");
-    var layerParameters =LayerParameter.getLayerParameters();
+    var layerParameters = LayerParameter.getLayerParameters();
     // layerParameters=LayerParameter.getLayerParameters();
 
     var layerParameter = new LayerParameter();
@@ -148,6 +149,14 @@ class Robot extends Component {
     }
   }
 
+  requestMastership() {
+    WebService.RequestManualModePrivileges();
+  }
+
+  releaseMastership() {
+    WebService.CancelManualModePrivileges();
+  }
+
   render() {
 
     return (
@@ -158,7 +167,13 @@ class Robot extends Component {
           controllerName={this.state.controllerName}
           programState={this.state.programState}
           runningSpeed={this.state.runningSpeed} />
-        <View layerParameters={this.state.layerParameters} />
+        {/* <View layerParameters={this.state.layerParameters} /> */}
+        <button onClick={this.requestMastership}>
+          Request Mastership Lasers
+        </button>
+        <button onClick={this.releaseMastership}>
+          Release Mastership Lasers
+        </button>
         © Copyright 2019 FPD WAC ABB
       </div>
     );
